@@ -5,7 +5,8 @@ class SettingsManager:
     def __init__(self, settings_path: str):
         self.settings_path = Path(settings_path)
         
-    def load_config(self):
+        
+    def load_settings(self) -> dict:
         """Load settings from JSON file"""
         try:
             if self.settings_path.exists():
@@ -22,3 +23,14 @@ class SettingsManager:
             "prefix": "",
             "extension": ""
         }
+        
+    
+    def save_settings(self, settings: dict) -> bool:
+        """Save settings to JSON file"""
+        try:
+            with open(self.settings_path, 'w') as f:
+                json.dump(settings, f, indent=4)
+            return True
+        except Exception as e:
+            print(f"Error saving settings: {e}")
+            return False
