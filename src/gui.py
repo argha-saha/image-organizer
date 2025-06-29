@@ -151,9 +151,15 @@ class App(ctk.CTk):
                 )
                 
                 if operation_type == "copy":
-                    msg = "Copy operation completed." if result else "Copy operation failed."
+                    if result > 0:
+                        msg = f"Copy operation completed:  {result} file{'s' if result != 1 else ''} copied"
+                    else:
+                        msg = "No files copied"
                 else:
-                    msg = "Move operation completed." if result else "Move operation failed."
+                    if result > 0:
+                        msg = f"Move operation completed: {result} file{'s' if result != 1 else ''} moved"
+                    else:
+                        msg = "No files moved"
                 
                 self.after(0, lambda: messagebox.showinfo("Done", msg))
             except Exception as e:
