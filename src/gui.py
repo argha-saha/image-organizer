@@ -61,7 +61,7 @@ class App(ctk.CTk):
         
         
     def _create_path_selector(self, parent, label_text, row, command):
-        ctk.CTkLabel(parent, text=label_text).grid(row=row, column=0, padx=10, pady=(0, 10), sticky="nsew")
+        ctk.CTkLabel(parent, text=label_text).grid(row=row, column=0, padx=10, sticky="nsew")
         entry = ctk.CTkEntry(parent)
         entry.grid(row=row, column=1, padx=5, pady=5, sticky="ew")
         button = ctk.CTkButton(parent, text="Browse", command=command, width=10)
@@ -97,17 +97,21 @@ class App(ctk.CTk):
         
         # Prefix
         ctk.CTkLabel(controls_frame, text="File Prefix:").grid(
-            row=3, column=0, padx=10, pady=(0, 10), sticky="nsew"
+            row=3, column=0, padx=10, sticky="nsew"
         )
         self.prefix_entry = ctk.CTkEntry(controls_frame)
         self.prefix_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
         
         # Extension
         ctk.CTkLabel(controls_frame, text="File Extension:").grid(
-            row=4, column=0, padx=10, pady=(0, 10), sticky="nsew"
+            row=4, column=0, padx=10, sticky="nsew"
         )
-        self.extension_entry = ctk.CTkEntry(controls_frame)
-        self.extension_entry.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
+        self.extension_combobox = ctk.CTkComboBox(
+            controls_frame,
+            values=["ARW", "CR3", "DNG", "NEF", "ORF", "RAF", "RW2"],
+            width=120
+        )
+        self.extension_combobox.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
         
         # Actions Frame
         actions_frame = ctk.CTkFrame(controls_frame)
@@ -140,7 +144,7 @@ class App(ctk.CTk):
             self.source_folder_entry.get(),
             self.destination_folder_entry.get(),
             self.prefix_entry.get(),
-            self.extension_entry.get(),
+            self.extension_combobox.get(),
             self.number_file_entry.get()
         )
         
@@ -154,7 +158,7 @@ class App(ctk.CTk):
         self.source_folder_entry.insert(0, settings.get("source_folder", ""))
         self.destination_folder_entry.insert(0, settings.get("destination_folder", ""))
         self.prefix_entry.insert(0, settings.get("prefix", ""))
-        self.extension_entry.insert(0, settings.get("extension", ""))
+        self.extension_combobox.set(settings.get("extension", ""))
         
         
     def _save_settings(self):
@@ -162,7 +166,7 @@ class App(ctk.CTk):
             "source_folder": self.source_folder_entry.get(),
             "destination_folder": self.destination_folder_entry.get(),
             "prefix": self.prefix_entry.get(),
-            "extension": self.extension_entry.get()
+            "extension": self.extension_combobox.get()
         }
         
         self.settings_manager.save_settings(settings_data)
