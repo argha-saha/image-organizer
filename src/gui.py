@@ -9,7 +9,7 @@ from settings_manager import SettingsManager
 APP_NAME = "Image Organizer"
 SETTINGS_FILE = "settings.json"
 DEFAULT_WIDTH = 800
-DEFAULT_HEIGHT = 600
+DEFAULT_HEIGHT = 400
 
 class App(ctk.CTk):
     def __init__(self):
@@ -34,33 +34,33 @@ class App(ctk.CTk):
         self.geometry(f"{DEFAULT_WIDTH}x{self.winfo_reqheight()}")
 
     
-    def _select_folder(self, entry_widget: ctk.CTkEntry):
+    def _select_folder(self, entry_widget: ctk.CTkEntry) -> None:
         path = filedialog.askdirectory(title="Select Folder")
         if path:
             entry_widget.delete(0, ctk.END)
             entry_widget.insert(0, path)
             
     
-    def _select_file(self, entry_widget: ctk.CTkEntry):
+    def _select_file(self, entry_widget: ctk.CTkEntry) -> None:
         path = filedialog.askopenfilename(title="Select File", filetypes=[("Text Files", "*.txt"), ("All Files", "*.*")])
         if path:
             entry_widget.delete(0, ctk.END)
             entry_widget.insert(0, path)
             
     
-    def _select_source_folder(self):
+    def _select_source_folder(self) -> None:
         self._select_folder(self.source_folder_entry)
         
         
-    def _select_destination_folder(self):
+    def _select_destination_folder(self) -> None:
         self._select_folder(self.destination_folder_entry)
         
         
-    def _select_number_file(self):
+    def _select_number_file(self) -> None:
         self._select_file(self.number_file_entry)
         
         
-    def _create_path_selector(self, parent, label_text, row, command):
+    def _create_path_selector(self, parent, label_text, row, command) -> ctk.CTkEntry:
         ctk.CTkLabel(parent, text=label_text).grid(row=row, column=0, padx=10, sticky="nsew")
         entry = ctk.CTkEntry(parent)
         entry.grid(row=row, column=1, padx=5, pady=5, sticky="ew")
@@ -69,7 +69,7 @@ class App(ctk.CTk):
         return entry
         
         
-    def _create_widgets(self):
+    def _create_widgets(self) -> None:
         self.grid_columnconfigure(0, weight=1)
         
         # Controls frame (label / entry / button)
@@ -135,10 +135,10 @@ class App(ctk.CTk):
         self.move_button.grid(row=0, column=2, padx=10, pady=10)
         
         
-    def _start_processing(self, operation_type: str):
+    def _start_processing(self, operation_type: str) -> None:
         self._save_settings()
         
-        def run_processor():
+        def _run_processor():
             processor = FileProcessor()
             try:
                 result = processor.process(
@@ -150,17 +150,21 @@ class App(ctk.CTk):
                     self.number_file_entry.get()
                 )
                 
-                msg = "Operation completed." if result else "No files processed."
+                if operation_type == "copy":
+                    msg = "Copy operation completed." if result else "Copy operation failed."
+                else:
+                    msg = "Move operation completed." if result else "Move operation failed."
+                
                 self.after(0, lambda: messagebox.showinfo("Done", msg))
             except Exception as e:
                 self.after(0, lambda: messagebox.showerror("Error", str(e)))
         
-        pthread = threading.Thread(target=run_processor)
+        pthread = threading.Thread(target=_run_processor)
         pthread.daemon = True
         pthread.start()
         
         
-    def _load_settings(self):
+    def _load_settings(self) -> None:
         settings = self.settings_manager.load_settings()
         self.source_folder_entry.insert(0, settings.get("source_folder", ""))
         self.destination_folder_entry.insert(0, settings.get("destination_folder", ""))
@@ -168,7 +172,7 @@ class App(ctk.CTk):
         self.extension_combobox.set(settings.get("extension", ""))
         
         
-    def _save_settings(self):
+    def _save_settings(self) -> None:
         settings_data = {
             "source_folder": self.source_folder_entry.get(),
             "destination_folder": self.destination_folder_entry.get(),
