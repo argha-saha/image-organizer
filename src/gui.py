@@ -108,7 +108,7 @@ class App(ctk.CTk):
         )
         self.extension_combobox = ctk.CTkComboBox(
             controls_frame,
-            values=["ARW", "CR3", "DNG", "NEF", "ORF", "RAF", "RW2"],
+            values=["ARW", "CR3", "DNG", "NEF", "ORF", "RAF", "RW2", "JPG", "PNG"],
             width=120
         )
         self.extension_combobox.grid(row=4, column=1, padx=5, pady=5, sticky="ew")
