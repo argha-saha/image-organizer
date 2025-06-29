@@ -1,6 +1,6 @@
 import customtkinter as ctk
 import threading
-from tkinter import filedialog
+from tkinter import filedialog, messagebox
 
 from file_processor import FileProcessor
 from settings_manager import SettingsManager
@@ -138,17 +138,24 @@ class App(ctk.CTk):
     def _start_processing(self, operation_type: str):
         self._save_settings()
         
-        processor = FileProcessor()
-        args = (
-            operation_type,
-            self.source_folder_entry.get(),
-            self.destination_folder_entry.get(),
-            self.prefix_entry.get(),
-            self.extension_combobox.get(),
-            self.number_file_entry.get()
-        )
+        def run_processor():
+            processor = FileProcessor()
+            try:
+                result = processor.process(
+                    operation_type,
+                    self.source_folder_entry.get(),
+                    self.destination_folder_entry.get(),
+                    self.prefix_entry.get(),
+                    self.extension_combobox.get(),
+                    self.number_file_entry.get()
+                )
+                
+                msg = "Operation completed." if result else "No files processed."
+                self.after(0, lambda: messagebox.showinfo("Done", msg))
+            except Exception as e:
+                self.after(0, lambda: messagebox.showerror("Error", str(e)))
         
-        pthread = threading.Thread(target=processor.process, args=args)
+        pthread = threading.Thread(target=run_processor)
         pthread.daemon = True
         pthread.start()
         
