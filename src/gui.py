@@ -4,6 +4,7 @@ from tkinter import filedialog, messagebox
 
 from file_processor import FileProcessor
 from settings_manager import SettingsManager
+from settings_window import SettingsWindow
 
 # Constants
 APP_NAME = "Image Organizer"
@@ -134,6 +135,13 @@ class App(ctk.CTk):
         )
         self.move_button.grid(row=0, column=2, padx=10, pady=10)
         
+        # Settings button
+        bottom_frame = ctk.CTkFrame(self)
+        bottom_frame.grid(row=2, column=0, sticky="sw", padx=20, pady=(20, 0))
+        bottom_frame.grid_columnconfigure(0, weight=1)
+        settings_button = ctk.CTkButton(bottom_frame, text="Settings", command=self._open_settings_window, width=10)
+        settings_button.grid(row=0, column=0, sticky="w")
+        
         
     def _start_processing(self, operation_type: str) -> None:
         self._save_settings()
@@ -177,18 +185,37 @@ class App(ctk.CTk):
         self.prefix_entry.insert(0, settings.get("prefix", ""))
         self.extension_combobox.set(settings.get("extension", ""))
         
+        # Apply appearance mode if present
+        appearance = settings.get("appearance_mode", "System")
+        ctk.set_appearance_mode(appearance.lower())
+        
         
     def _save_settings(self) -> None:
-        settings_data = {
+        settings = self.settings_manager.load_settings()
+        settings.update({
             "source_folder": self.source_folder_entry.get(),
             "destination_folder": self.destination_folder_entry.get(),
             "prefix": self.prefix_entry.get(),
-            "extension": self.extension_combobox.get()
-        }
-        
-        self.settings_manager.save_settings(settings_data)
+            "extension": self.extension_combobox.get(),
+        })
+        self.settings_manager.save_settings(settings)
         
         
     def _on_delete_window(self) -> None:
-        self._save_settings()
+        settings = self.settings_manager.load_settings()
+        retain_fields = settings.get("retain_fields", True)
+        
+        if retain_fields:
+            self._save_settings()
+        else:
+            # Clear fields in settings
+            self.settings_manager.save_settings({
+                "appearance_mode": settings.get("appearance_mode", "System"),
+                "retain_fields": False
+            })
+            
         self.destroy()
+        
+        
+    def _open_settings_window(self) -> None:
+        SettingsWindow(self)
