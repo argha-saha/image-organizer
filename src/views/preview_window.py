@@ -2,7 +2,7 @@ import customtkinter as ctk
 import tkinter as tk
 
 class PreviewWindow(ctk.CTkToplevel):
-    def __init__(self, parent, found, missing):
+    def __init__(self, parent, found, missing, overwrite=None):
         super().__init__(parent)
         self.title("Preview Files")
         self.geometry("600x400")
@@ -11,7 +11,10 @@ class PreviewWindow(ctk.CTkToplevel):
         main_label = ctk.CTkLabel(self, text="File Processing Summary", font=ctk.CTkFont(size=18, weight="bold"))
         main_label.pack(pady=(10, 0))
 
-        summary_label = ctk.CTkLabel(self, text=f"Found: {len(found)}   Missing: {len(missing)}", font=ctk.CTkFont(size=14))
+        summary_text = f"Found: {len(found)}   Missing: {len(missing)}"
+        if overwrite is not None:
+            summary_text += f"   Overwrite: {len(overwrite)}"
+        summary_label = ctk.CTkLabel(self, text=summary_text, font=ctk.CTkFont(size=14))
         summary_label.pack()
 
         frame = ctk.CTkFrame(self)
@@ -26,6 +29,9 @@ class PreviewWindow(ctk.CTkToplevel):
             listbox.insert("end", f)
         for f in missing:
             listbox.insert("end", f"[MISSING] {f}")
-            
+        if overwrite:
+            for f in overwrite:
+                listbox.insert("end", f"[OVERWRITE] {f}")
+                
         close_button = ctk.CTkButton(self, text="Close", command=self.destroy)
         close_button.pack(pady=(10, 20))

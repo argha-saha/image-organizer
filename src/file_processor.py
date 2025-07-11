@@ -22,26 +22,32 @@ class FileProcessor:
             return []
         
         
-    def get_files_to_process(self, source_folder, prefix, extension, number_file):
+    def get_files_to_process(self, source_folder, prefix, extension, number_file, destination_folder=None):
         found = []
         missing = []
+        overwrite = []
         source_dir = Path(source_folder)
         number_file_path = Path(number_file)
+        dest_dir = Path(destination_folder) if destination_folder else None
         
         if not source_dir.is_dir() or not number_file_path.is_file():
-            return found, missing
+            return found, missing, overwrite
         
         with open(number_file_path, 'r') as f:
             numbers = [num for num in re.split(r'[\s,]+', f.read()) if num]
-            
-        ext = f".{extension.lstrip('.')}" if extension else ''
         
+        ext = f".{extension.lstrip('.')}" if extension else ''
         for num in numbers:
             filename = f"{prefix}{num}{ext}"
             file_path = source_dir / filename
-            (found if file_path.exists() else missing).append(str(file_path))
-            
-        return found, missing
+            if file_path.exists():
+                found.append(str(file_path))
+                # Check for overwrite if destination_folder is provided
+                if dest_dir and (dest_dir / filename).exists():
+                    overwrite.append(str(dest_dir / filename))
+            else:
+                missing.append(str(file_path))
+        return found, missing, overwrite
     
     
     def process(

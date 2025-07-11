@@ -294,10 +294,11 @@ class App(ctk.CTk):
         
     def _preview_files(self):
         processor = FileProcessor()
-        found, missing = processor.get_files_to_process(
+        found, missing, overwrite = processor.get_files_to_process(
             self.source_folder_entry.get(),
             self.prefix_entry.get(),
             self.extension_combobox.get(),
-            self.number_file_entry.get()
+            self.number_file_entry.get(),
+            self.destination_folder_entry.get()
         )
-        PreviewWindow(self, found, missing)
+        PreviewWindow(self, found, missing, overwrite)
