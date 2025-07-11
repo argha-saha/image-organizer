@@ -21,7 +21,9 @@ class SettingsManager:
             "source_folder": "",
             "destination_folder": "",
             "prefix": "",
-            "extension": ""
+            "extension": "",
+            "appearance_mode": "System",
+            "retain_fields": True
         }
         
     
