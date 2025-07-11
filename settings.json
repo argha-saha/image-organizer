@@ -1,4 +1,6 @@
 {
+    "appearance_mode": "System",
+    "retain_fields": true,
     "source_folder": "",
     "destination_folder": "",
     "prefix": "",

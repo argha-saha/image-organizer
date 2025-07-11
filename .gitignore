@@ -1,6 +1,11 @@
 .venv
+.DS_Store
 __pycache__
 tempCodeRunnerFile.py
-srctest
-desttest
+build/
+dist/
+srctest/
+desttest/
 numfile.txt
+ImageOrganizer.spec
+src/ctkpath.py

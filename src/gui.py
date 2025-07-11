@@ -62,7 +62,7 @@ class App(ctk.CTk):
         
         
     def _create_path_selector(self, parent, label_text, row, command) -> ctk.CTkEntry:
-        ctk.CTkLabel(parent, text=label_text).grid(row=row, column=0, padx=10, sticky="nsew")
+        ctk.CTkLabel(parent, text=label_text, anchor="e", justify="right").grid(row=row, column=0, padx=10, sticky="e")
         entry = ctk.CTkEntry(parent)
         entry.grid(row=row, column=1, padx=5, pady=5, sticky="ew")
         button = ctk.CTkButton(parent, text="Browse", command=command, width=10)
@@ -72,10 +72,14 @@ class App(ctk.CTk):
         
     def _create_widgets(self) -> None:
         self.grid_columnconfigure(0, weight=1)
+
+        # App name label at the top
+        app_name_label = ctk.CTkLabel(self, text=APP_NAME, font=ctk.CTkFont(size=24, weight="bold"))
+        app_name_label.grid(row=0, column=0, pady=(20, 10), sticky="n")
         
         # Controls frame (label / entry / button)
         controls_frame = ctk.CTkFrame(self)
-        controls_frame.grid(row=0, column=0, padx=20, pady=(20, 0), sticky="ew")
+        controls_frame.grid(row=1, column=0, padx=20, pady=(0, 0), sticky="ew")
         controls_frame.grid_columnconfigure(1, weight=1)
         
         # Source folder
@@ -97,15 +101,15 @@ class App(ctk.CTk):
         )
         
         # Prefix
-        ctk.CTkLabel(controls_frame, text="File Prefix:").grid(
-            row=3, column=0, padx=10, sticky="nsew"
+        ctk.CTkLabel(controls_frame, text="File Prefix:", anchor="e", justify="right").grid(
+            row=3, column=0, padx=10, sticky="e"
         )
         self.prefix_entry = ctk.CTkEntry(controls_frame)
         self.prefix_entry.grid(row=3, column=1, padx=5, pady=5, sticky="ew")
         
         # Extension
-        ctk.CTkLabel(controls_frame, text="File Extension:").grid(
-            row=4, column=0, padx=10, sticky="nsew"
+        ctk.CTkLabel(controls_frame, text="File Extension:", anchor="e", justify="right").grid(
+            row=4, column=0, padx=10, sticky="e"
         )
         self.extension_combobox = ctk.CTkComboBox(
             controls_frame,
@@ -118,22 +122,33 @@ class App(ctk.CTk):
         actions_frame = ctk.CTkFrame(controls_frame)
         actions_frame.grid(row=5, column=0, columnspan=3, padx=10, pady=(20, 10), sticky="ew")
         
-        actions_frame.grid_columnconfigure(0, weight=1)
-        actions_frame.grid_columnconfigure(1, weight=0)
-        actions_frame.grid_columnconfigure(2, weight=0)
-        actions_frame.grid_columnconfigure(3, weight=1)
+        # Make all columns for buttons have equal weight for even spacing
+        for i in range(4):
+            actions_frame.grid_columnconfigure(i, weight=1)
         
         self.copy_button = ctk.CTkButton(
             actions_frame, text="Copy Files", 
             command=lambda: self._start_processing("copy")
         )
-        self.copy_button.grid(row=0, column=1, padx=10, pady=10)
+        self.copy_button.grid(row=0, column=0, padx=10, pady=10, sticky="ew")
         
         self.move_button = ctk.CTkButton(
             actions_frame, text="Move Files", 
             command=lambda: self._start_processing("move")
         )
-        self.move_button.grid(row=0, column=2, padx=10, pady=10)
+        self.move_button.grid(row=0, column=1, padx=10, pady=10, sticky="ew")
+        
+        self.rename_button = ctk.CTkButton(
+            actions_frame, text="Rename Files",
+            command=lambda: self._start_processing("rename")
+        )
+        self.rename_button.grid(row=0, column=2, padx=10, pady=10, sticky="ew")
+        
+        self.delete_button = ctk.CTkButton(
+            actions_frame, text="Delete Files",
+            command=lambda: self._start_processing("delete")
+        )
+        self.delete_button.grid(row=0, column=3, padx=10, pady=10, sticky="ew")
         
         # Settings button
         bottom_frame = ctk.CTkFrame(self)
@@ -163,11 +178,21 @@ class App(ctk.CTk):
                         msg = f"Copy operation completed:  {result} file{'s' if result != 1 else ''} copied"
                     else:
                         msg = "No files copied"
-                else:
+                elif operation_type == "move":
                     if result > 0:
                         msg = f"Move operation completed: {result} file{'s' if result != 1 else ''} moved"
                     else:
                         msg = "No files moved"
+                elif operation_type == "rename":
+                    if result > 0:
+                        msg = f"Rename operation completed: {result} file{'s' if result != 1 else ''} renamed"
+                    else:
+                        msg = "No files renamed"
+                else:  # delete
+                    if result > 0:
+                        msg = f"Delete operation completed: {result} file{'s' if result != 1 else ''} deleted"
+                    else:
+                        msg = "No files deleted"
                 
                 self.after(0, lambda: messagebox.showinfo("Done", msg))
             except Exception as e:
