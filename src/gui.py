@@ -73,10 +73,20 @@ class App(ctk.CTk):
     def _create_widgets(self) -> None:
         self.grid_columnconfigure(0, weight=1)
 
-        # App name label at the top
-        app_name_label = ctk.CTkLabel(self, text=APP_NAME, font=ctk.CTkFont(size=24, weight="bold"))
-        app_name_label.grid(row=0, column=0, pady=(20, 10), sticky="n")
-        
+        # Header frame for app name and settings button
+        header_frame = ctk.CTkFrame(self, fg_color="transparent")
+        header_frame.grid(row=0, column=0, sticky="ew", padx=20, pady=(20, 0))
+        header_frame.grid_columnconfigure(0, weight=1)
+        header_frame.grid_columnconfigure(1, weight=0)
+
+        # App name label (left-aligned)
+        app_name_label = ctk.CTkLabel(header_frame, text=APP_NAME, font=ctk.CTkFont(size=24, weight="bold"))
+        app_name_label.grid(row=0, column=0, pady=(0, 20), sticky="w")
+
+        # Settings button (right-aligned)
+        settings_button = ctk.CTkButton(header_frame, text="Settings", command=self._open_settings_window, width=10)
+        settings_button.grid(row=0, column=1, sticky="e", padx=(10, 0))
+
         # Controls frame (label / entry / button)
         controls_frame = ctk.CTkFrame(self)
         controls_frame.grid(row=1, column=0, padx=20, pady=(0, 0), sticky="ew")
@@ -150,28 +160,52 @@ class App(ctk.CTk):
         )
         self.delete_button.grid(row=0, column=3, padx=10, pady=10, sticky="ew")
         
-        # Settings button
-        bottom_frame = ctk.CTkFrame(self)
-        bottom_frame.grid(row=2, column=0, sticky="sw", padx=20, pady=(20, 0))
-        bottom_frame.grid_columnconfigure(0, weight=1)
-        settings_button = ctk.CTkButton(bottom_frame, text="Settings", command=self._open_settings_window, width=10)
-        settings_button.grid(row=0, column=0, sticky="w")
-        
+        # Progress bar
+        self.progress_var = ctk.DoubleVar(value=0)
+        self.progress_bar = ctk.CTkProgressBar(self, variable=self.progress_var, width=400)
+        self.progress_bar.grid(row=3, column=0, pady=(20, 0), padx=20, sticky="ew")
+        self.progress_bar.grid_remove()  # Hide by default
+
         
     def _start_processing(self, operation_type: str) -> None:
         self._save_settings()
-        
+        self.progress_var.set(0)
+        self.progress_bar.grid()  # Show progress bar
+        self.progress_bar.update()
+
         def _run_processor():
             processor = FileProcessor()
+            total = 0
+            processed = 0
+            
             try:
+                # Count total files to process
+                number_file = self.number_file_entry.get()
+                
+                if number_file:
+                    with open(number_file, 'r') as f:
+                        import re
+                        numbers = [num for num in re.split(r'[\s,]+', f.read()) if num]
+                        total = len(numbers)
+                        
+                if total == 0:
+                    # Prevent division by zero
+                    total = 1
+                
+                def progress_callback(done):
+                    self.progress_var.set(done / total)
+                    self.progress_bar.update()
+                
                 result = processor.process(
                     operation_type,
                     self.source_folder_entry.get(),
                     self.destination_folder_entry.get(),
                     self.prefix_entry.get(),
                     self.extension_combobox.get(),
-                    self.number_file_entry.get()
+                    self.number_file_entry.get(),
+                    progress_callback=progress_callback
                 )
+                self.after(0, lambda: self.progress_bar.grid_remove())
                 
                 if operation_type == "copy":
                     if result > 0:
@@ -196,6 +230,7 @@ class App(ctk.CTk):
                 
                 self.after(0, lambda: messagebox.showinfo("Done", msg))
             except Exception as e:
+                self.after(0, lambda: self.progress_bar.grid_remove())
                 self.after(0, lambda: messagebox.showerror("Error", str(e)))
         
         pthread = threading.Thread(target=_run_processor)

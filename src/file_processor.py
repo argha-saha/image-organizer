@@ -29,7 +29,8 @@ class FileProcessor:
         destination_folder: str,
         prefix: str,
         extension: str,
-        number_file: str
+        number_file: str,
+        progress_callback=None
     ) -> int:
         """Organizes files based on the parameters. Returns the number of files successfully processed."""
         
@@ -49,7 +50,7 @@ class FileProcessor:
         success_count = 0
         fail_count = 0
         
-        for num in numbers:
+        for idx, num in enumerate(numbers, 1):
             ext = f".{extension.lstrip('.')}" if extension else ''
             filename = f"{prefix}{num}{ext}"
             src_path = source_dir / filename
@@ -98,6 +99,9 @@ class FileProcessor:
                 else:
                     logging.warning(f"File {src_path} does not exist.")
                     fail_count += 1
+            
+            if progress_callback:
+                progress_callback(idx)
             
         logging.info(f"SUMMARY: Success: {success_count}, Failures: {fail_count}")
         return success_count
