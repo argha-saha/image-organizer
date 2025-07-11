@@ -1,4 +1,4 @@
-from gui import App
+from views.organize_window import App
 
 if __name__ == "__main__":
     app = App()

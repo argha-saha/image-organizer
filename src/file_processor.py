@@ -21,6 +21,28 @@ class FileProcessor:
             logging.error(f"Error reading file {file_path}: {e}")
             return []
         
+        
+    def get_files_to_process(self, source_folder, prefix, extension, number_file):
+        found = []
+        missing = []
+        source_dir = Path(source_folder)
+        number_file_path = Path(number_file)
+        
+        if not source_dir.is_dir() or not number_file_path.is_file():
+            return found, missing
+        
+        with open(number_file_path, 'r') as f:
+            numbers = [num for num in re.split(r'[\s,]+', f.read()) if num]
+            
+        ext = f".{extension.lstrip('.')}" if extension else ''
+        
+        for num in numbers:
+            filename = f"{prefix}{num}{ext}"
+            file_path = source_dir / filename
+            (found if file_path.exists() else missing).append(str(file_path))
+            
+        return found, missing
+    
     
     def process(
         self,
@@ -72,6 +94,7 @@ class FileProcessor:
                 # For renaming, destination_folder is used as the new prefix
                 new_filename = f"{destination_folder}{num}{ext}"
                 new_path = source_dir / new_filename
+                
                 if src_path.exists():
                     try:
                         src_path.rename(new_path)

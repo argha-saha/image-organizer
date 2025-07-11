@@ -9,3 +9,4 @@ desttest/
 numfile.txt
 ImageOrganizer.spec
 src/ctkpath.py
+settings.json
